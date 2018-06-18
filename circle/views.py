@@ -1,43 +1,92 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Post
 from django.utils import timezone
-from .forms import PostForm
-
+from .forms import PostForm, LoginForm, RegistrationForm
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth.models import User
 
 # Create your views here.
 def post_list(request):
-    posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
-    return render(request, 'circle/post_list.html', {'posts': posts})
-
+    if request.user.is_authenticated:
+        posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
+        return render(request, 'circle/post_list.html', {'posts': posts})
+    else:
+        return redirect('login')
 
 def post_detail(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    return render(request, 'circle/post_detail.html', {'post': post})
+    if request.user.is_authenticated:
+        post = get_object_or_404(Post, pk=pk)
+        return render(request, 'circle/post_detail.html', {'post': post})
+    else:
+        return redirect('login')
 
 
 def post_new(request):
-    if request.method == "POST":
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.publish()
-            return redirect('post_list')
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            form = PostForm(request.POST)
+            if form.is_valid():
+                post = form.save(commit=False)
+                post.author = request.user
+                post.publish()
+                return redirect('post_list')
+        else:
+            form = PostForm()
+        return render(request, 'circle/post_edit.html', {'form': form})
     else:
-        form = PostForm()
-    return render(request, 'circle/post_edit.html', {'form': form})
+        return redirect('login')
 
 
 def post_edit(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    if request.method == "POST":
-        form = PostForm(request.POST, instance=post)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.published_date = timezone.now()
-            post.save()
-            return redirect('post_list')
+    if request.user.is_authenticated:
+        post = get_object_or_404(Post, pk=pk)
+        if request.method == "POST":
+            form = PostForm(request.POST, instance=post)
+            if form.is_valid():
+                post = form.save(commit=False)
+                post.author = request.user
+                post.published_date = timezone.now()
+                post.save()
+                return redirect('post_list')
+        else:
+            form = PostForm(instance=post)
+        return render(request, 'circle/post_edit.html', {'form': form})
     else:
-        form = PostForm(instance=post)
-    return render(request, 'circle/post_edit.html', {'form': form})
+        return redirect('login')
+
+def login(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            auth_login(request, user)
+            return redirect('post_list')
+        else:
+            form = LoginForm()
+            return render(request, 'circle/login.html', {'form': form})
+    else:
+        form = LoginForm()
+        return render(request, 'circle/login.html', {'form': form})
+
+def logout(request):
+    auth_logout(request)
+    return redirect('login')
+
+
+def register(request):
+    if request.method == "POST":
+        username = request.POST['username']
+        password = request.POST['password1']
+        email = request.POST['email']
+        if User.objects.filter(username=username).exists():
+            form = RegistrationForm()
+            return render(request, 'circle/register.html', {'form': form})
+        else:
+            user = User.objects.create_user(username, email, password)
+            user.save()
+            return redirect('login')
+    else:
+        form = RegistrationForm()
+        return render(request, 'circle/register.html', {'form': form})
+
