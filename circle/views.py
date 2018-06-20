@@ -4,6 +4,8 @@ from django.utils import timezone
 from .forms import PostForm, LoginForm, RegistrationForm
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.models import User
+from django.contrib import messages
+
 
 # Create your views here.
 def post_list(request):
@@ -54,6 +56,13 @@ def post_edit(request, pk):
     else:
         return redirect('login')
 
+
+def post_remove(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    post.delete()
+    return redirect('post_list')
+
+
 def login(request):
     if request.method == "POST":
         username = request.POST['username']
@@ -61,8 +70,10 @@ def login(request):
         user = authenticate(username=username, password=password)
         if user is not None:
             auth_login(request, user)
+            messages.add_message(request, messages.SUCCESS, 'Login successful.')
             return redirect('post_list')
         else:
+            messages.add_message(request, messages.ERROR, 'Invalid username or password.')
             form = LoginForm()
             return render(request, 'circle/login.html', {'form': form})
     else:
@@ -80,11 +91,13 @@ def register(request):
         password = request.POST['password1']
         email = request.POST['email']
         if User.objects.filter(username=username).exists():
+            messages.add_message(request, messages.ERROR, 'Username already exists.')
             form = RegistrationForm()
             return render(request, 'circle/register.html', {'form': form})
         else:
             user = User.objects.create_user(username, email, password)
             user.save()
+            messages.add_message(request, messages.SUCCESS, 'Successfully created user.')
             return redirect('login')
     else:
         form = RegistrationForm()
