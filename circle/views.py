@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Post
 from django.utils import timezone
-from .forms import PostForm, LoginForm, RegistrationForm
+from .forms import PostForm, LoginForm, RegistrationForm, CommentForm
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -12,13 +12,6 @@ def post_list(request):
     if request.user.is_authenticated:
         posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
         return render(request, 'circle/post_list.html', {'posts': posts})
-    else:
-        return redirect('login')
-
-def post_detail(request, pk):
-    if request.user.is_authenticated:
-        post = get_object_or_404(Post, pk=pk)
-        return render(request, 'circle/post_detail.html', {'post': post})
     else:
         return redirect('login')
 
@@ -102,4 +95,21 @@ def register(request):
     else:
         form = RegistrationForm()
         return render(request, 'circle/register.html', {'form': form})
+
+def post_detail(request, pk):
+    if request.user.is_authenticated:
+        post = get_object_or_404(Post, pk=pk)
+        if request.method == "POST":
+            form = CommentForm(request.POST)
+            if form.is_valid():
+                comment = form.save(commit=False)
+                comment.author = request.user
+                comment.post = post
+                comment.save()
+                return redirect('post_detail', pk=post.pk)
+        else:
+            form = CommentForm()
+        return render(request, 'circle/post_detail.html', {'post': post,'form': form})
+    else:
+        return redirect('login')
 

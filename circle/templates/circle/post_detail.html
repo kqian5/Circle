@@ -14,5 +14,17 @@
         {% endif %}
         <center><img src="{{ post.image.url }}" class="image-thumbnail img-fluid"></center>
         <p>{{ post.text|linebreaksbr }}</p>
+        <hr>
+        {% for comment in post.comments.all %}
+            <div class="comment">
+                <p>{{ comment.created_date }} {{ comment.author }}: {{ comment.text}}</p>
+            </div>
+        {% empty %}
+        {% endfor %}
+        <p>Add Comment:</p>
+        <form method="POST" class="post-form">{% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="save btn btn-default">Submit</button>
+        </form>
     </div>
 {% endblock %}
