@@ -50,10 +50,20 @@ ul {
 }
 
 .messages {
-    display: block;
+    padding: 5px;
+    color: white;
+    margin-bottom: 15px;
+    background-color: black;
+    font-size: 10px;
+    text-transform: uppercase;
 }
 
-.SUCCESS {
-    background: #7CFC00;
-    padding: 10px;
+.closebtn {
+    margin-left: 1000px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 15px;
+    line-height: 10px;
+    cursor: pointer;
 }
