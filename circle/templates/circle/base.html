@@ -24,6 +24,9 @@
             </form>
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
+                    <a href="{% url 'user_profile' %}" class="nav-link">Profile</a>
+                </li>
+                <li class="nav-item">
                     <a href="{% url 'post_new' %}" class="nav-link">New Post</a>
                 </li>
                 <li class="nav-item">
@@ -34,11 +37,12 @@
         <div class="container">
             <div class="row">
                 {% if messages %}
-                <ul class="messages">
+                <div class="messages">
                     {% for message in messages %}
-                    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}> {{message}} </li>
+                    <span {% if message.tags %} class="{{ message.tags }}"{% endif %} onclick="this.parentElement.style.display='none'">&times;</span>
+                    {{ message }}
                     {% endfor %}
-                </ul>
+                </div>
                 {% endif %}
             {% block content %}
             {% endblock %}

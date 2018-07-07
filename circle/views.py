@@ -5,15 +5,14 @@ from .forms import PostForm, LoginForm, RegistrationForm, CommentForm
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
+@login_required
 def post_list(request):
-    if request.user.is_authenticated:
-        posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
-        return render(request, 'circle/post_list.html', {'posts': posts})
-    else:
-        return redirect('login')
+    posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
+    return render(request, 'circle/post_list.html', {'posts': posts})
 
 
 def post_new(request):
@@ -112,4 +111,11 @@ def post_detail(request, pk):
         return render(request, 'circle/post_detail.html', {'post': post,'form': form})
     else:
         return redirect('login')
+
+
+@login_required
+def user_profile(request):
+    posts = Post.objects.filter(author=request.user)
+    posts = posts.filter(published_date__lte=timezone.now()).order_by('-published_date')
+    return render(request, 'circle/profile.html', {'posts': posts})
 

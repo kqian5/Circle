@@ -11,4 +11,5 @@ urlpatterns = [
     url(r'^logout/$', views.logout, name='logout'),
     url(r'^register/$', views.register, name='register'),
     url(r'^post/(?P<pk>\d+)/remove/$', views.post_remove, name='post_remove'),
+    url(r'^profile/user$', views.user_profile, name='user_profile'),
 ]

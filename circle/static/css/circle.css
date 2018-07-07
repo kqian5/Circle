@@ -1,0 +1,59 @@
+body{
+
+}
+
+.post {
+    border: thin solid black;
+    width: 65%;
+    margin: 20px auto;
+    padding: 30px;
+    display: block;
+}
+
+.content {
+    align-content: center;
+}
+
+h1 {
+    color: black;
+}
+
+a {
+    color: black;
+}
+
+a:hover {
+    color: #A9A9A9;
+    text-decoration: none;
+}
+
+.date{
+    color: #A9A9A9;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+p{
+    padding: 20px;
+}
+
+img {
+    display: block;
+    max-width:400px;
+    max-height:500px;
+    width: auto;
+    height: auto;
+}
+
+ul {
+    list-style: none;
+}
+
+.messages {
+    display: block;
+}
+
+.SUCCESS {
+    background: #7CFC00;
+    padding: 10px;
+}
