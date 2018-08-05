@@ -12,4 +12,5 @@ urlpatterns = [
     url(r'^register/$', views.register, name='register'),
     url(r'^post/(?P<pk>\d+)/remove/$', views.post_remove, name='post_remove'),
     url(r'^profile/user$', views.user_profile, name='user_profile'),
+    url(r'^post/(?P<pk>\d+)/like/$', views.like, name='like'),
 ]

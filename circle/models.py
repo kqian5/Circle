@@ -21,6 +21,7 @@ class Post(models.Model):
     def __str__(self):
         return self.title
 
+
 class Comment(models.Model):
     post = models.ForeignKey('circle.Post', on_delete=models.CASCADE, related_name='comments')
     author = models.CharField(max_length=200)
@@ -34,3 +35,10 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text
+
+
+class Like(models.Model):
+    author = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    post_pk = models.IntegerField(null=True)
+    comment = models.ForeignKey(Comment, null=True, on_delete=models.CASCADE)
+

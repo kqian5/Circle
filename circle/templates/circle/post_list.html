@@ -9,6 +9,7 @@
             </div>
             <center><img src="{{ post.image.url }}" class="image-thumbnail img-fluid"></center>
             <p>{{ post.text|linebreaksbr }}</p>
+            <p><a href="{% url 'like' pk=post.pk %}">Likes: </a>{# {{ Like.object.filter(post=post) }} #}</p>
             <a href="{% url 'post_detail' pk=post.pk %}">Comments: {{ post.comments.count }}</a>
         </div>
     {% endfor %}

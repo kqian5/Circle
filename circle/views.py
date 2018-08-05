@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Post
+from .models import Post, Like
 from django.utils import timezone
 from .forms import PostForm, LoginForm, RegistrationForm, CommentForm
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
@@ -12,7 +12,7 @@ from django.contrib.auth.decorators import login_required
 @login_required
 def post_list(request):
     posts = Post.objects.filter(published_date__lte=timezone.now()).order_by('-published_date')
-    return render(request, 'circle/post_list.html', {'posts': posts})
+    return render(request, 'circle/post_list.html', {'posts': posts, 'Like': Like})
 
 
 def post_new(request):
@@ -98,6 +98,7 @@ def register(request):
 def post_detail(request, pk):
     if request.user.is_authenticated:
         post = get_object_or_404(Post, pk=pk)
+        num_likes = Like.objects.filter(post_pk=pk).count()
         if request.method == "POST":
             form = CommentForm(request.POST)
             if form.is_valid():
@@ -108,7 +109,7 @@ def post_detail(request, pk):
                 return redirect('post_detail', pk=post.pk)
         else:
             form = CommentForm()
-        return render(request, 'circle/post_detail.html', {'post': post,'form': form})
+        return render(request, 'circle/post_detail.html', {'post': post,'form': form,'num_likes': num_likes})
     else:
         return redirect('login')
 
@@ -118,4 +119,14 @@ def user_profile(request):
     posts = Post.objects.filter(author=request.user)
     posts = posts.filter(published_date__lte=timezone.now()).order_by('-published_date')
     return render(request, 'circle/profile.html', {'posts': posts})
+
+@login_required
+def like(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    Like.objects.get_or_create(author=request.user, post_pk=pk)
+    return redirect('post_detail', pk=pk)
+
+
+
+
 
