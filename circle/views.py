@@ -15,40 +15,37 @@ def post_list(request):
     return render(request, 'circle/post_list.html', {'posts': posts, 'Like': Like})
 
 
+@login_required
 def post_new(request):
-    if request.user.is_authenticated:
-        if request.method == "POST":
-            form = PostForm(request.POST, request.FILES or None)
-            if form.is_valid():
-                post = form.save(commit=False)
-                post.author = request.user
-                post.publish()
-                return redirect('post_list')
-        else:
-            form = PostForm()
-        return render(request, 'circle/post_edit.html', {'form': form})
+    if request.method == "POST":
+        form = PostForm(request.POST, request.FILES or None)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.publish()
+            return redirect('post_list')
     else:
-        return redirect('login')
+        form = PostForm()
+    return render(request, 'circle/post_edit.html', {'form': form})
 
 
+@login_required
 def post_edit(request, pk):
-    if request.user.is_authenticated:
-        post = get_object_or_404(Post, pk=pk)
-        if request.method == "POST":
-            form = PostForm(request.POST, request.FILES or None, instance=post)
-            if form.is_valid():
-                post = form.save(commit=False)
-                post.author = request.user
-                post.published_date = timezone.now()
-                post.save()
-                return redirect('post_list')
-        else:
-            form = PostForm(instance=post)
-        return render(request, 'circle/post_edit.html', {'form': form})
+    post = get_object_or_404(Post, pk=pk)
+    if request.method == "POST":
+        form = PostForm(request.POST, request.FILES or None, instance=post)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.published_date = timezone.now()
+            post.save()
+            return redirect('post_list')
     else:
-        return redirect('login')
+        form = PostForm(instance=post)
+    return render(request, 'circle/post_edit.html', {'form': form})
 
 
+@login_required
 def post_remove(request, pk):
     post = get_object_or_404(Post, pk=pk)
     post.delete()
@@ -72,6 +69,8 @@ def login(request):
         form = LoginForm()
         return render(request, 'circle/login.html', {'form': form})
 
+
+@login_required
 def logout(request):
     auth_logout(request)
     return redirect('login')
@@ -95,34 +94,34 @@ def register(request):
         form = RegistrationForm()
         return render(request, 'circle/register.html', {'form': form})
 
+
+@login_required
 def post_detail(request, pk):
-    if request.user.is_authenticated:
-        post = get_object_or_404(Post, pk=pk)
-        num_likes = Like.objects.filter(post_pk=pk).count()
-        if request.method == "POST":
-            form = CommentForm(request.POST)
-            if form.is_valid():
-                comment = form.save(commit=False)
-                comment.author = request.user
-                comment.post = post
-                comment.save()
-                return redirect('post_detail', pk=post.pk)
-        else:
-            form = CommentForm()
-        return render(request, 'circle/post_detail.html', {'post': post,'form': form,'num_likes': num_likes})
+    post = get_object_or_404(Post, pk=pk)
+    num_likes = Like.objects.filter(post_pk=pk).count()
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = request.user
+            comment.post = post
+            comment.save()
+            return redirect('post_detail', pk=post.pk)
     else:
-        return redirect('login')
+        form = CommentForm()
+    return render(request, 'circle/post_detail.html', {'post': post,'form': form,'num_likes': num_likes})
 
 
 @login_required
-def user_profile(request):
-    posts = Post.objects.filter(author=request.user)
+def user_detail(request, pk):
+    user = get_object_or_404(User, pk=pk)
+    posts = Post.objects.filter(author=user)
     posts = posts.filter(published_date__lte=timezone.now()).order_by('-published_date')
     return render(request, 'circle/profile.html', {'posts': posts})
 
+
 @login_required
 def like(request, pk):
-    post = get_object_or_404(Post, pk=pk)
     Like.objects.get_or_create(author=request.user, post_pk=pk)
     return redirect('post_detail', pk=pk)
 

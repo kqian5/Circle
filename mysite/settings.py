@@ -68,6 +68,8 @@ TEMPLATES = [
     },
 ]
 
+TEMPLATES[0]['OPTIONS']['context_processors'].append("circle.context_processors.user_processor")
+
 WSGI_APPLICATION = 'mysite.wsgi.application'
 
 
